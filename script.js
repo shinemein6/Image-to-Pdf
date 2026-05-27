@@ -28,15 +28,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2. 파일 입력 처리
     imageInput.addEventListener('change', async (e) => {
-        // 이름순 강제 정렬 로직 제거. 운영체제가 넘겨준 순서 그대로 가져옵니다.
-        const files = Array.from(e.target.files);
+        // --- 파일 이름순(자연스러운 오름차순) 정렬 로직 ---
+        const files = Array.from(e.target.files).sort((a, b) => {
+            return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
+        });
         
         if (files.length === 0) return;
 
         loadingDiv.innerText = "이미지를 불러오는 중입니다...";
         loadingDiv.classList.remove('hidden');
 
-        // 비동기 로딩으로 인해 순서가 뒤섞이는 것을 방지
+        // 정렬된 순서대로 비동기 로딩 대기 후 화면에 추가
         for (const file of files) {
             const imgDataUrl = await readFile(file);
             const img = await loadImage(imgDataUrl);
@@ -90,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const { jsPDF } = window.jspdf;
             let pdf = null;
 
-            // DOM에 렌더링된 순서(화면에서 드래그로 맞춘 최종 순서)대로 PDF 생성
+            // DOM에 렌더링된 최종 순서대로 PDF 생성
             items.forEach((item, index) => {
                 const imgData = item.dataset.imgSrc;
                 const width = parseInt(item.dataset.width);
